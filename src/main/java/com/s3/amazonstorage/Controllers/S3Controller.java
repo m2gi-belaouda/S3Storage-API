@@ -1,5 +1,8 @@
 package com.s3.amazonstorage.Controllers;
 
+import com.s3.amazonstorage.Controllers.Validator.FileValidator;
+import com.s3.amazonstorage.Exceptions.FileIsEmptyException;
+import com.s3.amazonstorage.Exceptions.FileNotImageException;
 import com.s3.amazonstorage.Services.IS3Service;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +24,11 @@ public class S3Controller {
     private IS3Service s3Service;
 
     @PostMapping("upload")
-    public String upload(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty())
-            return "Please select a file to upload.";
-
-        if (!isImage(file))
-            return "Please upload only images.";
+    public String upload(@RequestParam("file") MultipartFile file) throws FileNotImageException, FileIsEmptyException {
+        FileValidator.isNotEmpty(file);
+        FileValidator.isImage(file);
 
         return s3Service.saveFile(file);
-    }
-
-    private boolean isImage(MultipartFile file) {
-        try {
-            return Arrays.asList(
-                    ContentType.IMAGE_JPEG.getMimeType(),
-                    ContentType.IMAGE_PNG.getMimeType(),
-                    ContentType.IMAGE_GIF.getMimeType()).contains(file.getContentType());
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @GetMapping("download")

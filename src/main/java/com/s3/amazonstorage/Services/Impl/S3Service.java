@@ -7,9 +7,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.s3.amazonstorage.Services.IS3Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.services.s3.model.*;
@@ -38,9 +36,9 @@ public class S3Service implements IS3Service {
             @Value("${region}") String awsRegion
     ) {
         this.bucketName = bucketName;
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
-        this.awsRegion = awsRegion;
+        this.accessKey  = accessKey;
+        this.secretKey  = secretKey;
+        this.awsRegion  = awsRegion;
 
         this.s3 = AmazonS3ClientBuilder.standard()
                                        .withCredentials(
@@ -95,7 +93,6 @@ public class S3Service implements IS3Service {
                                                         .map(S3ObjectSummary::getKey)
                                                         .collect(Collectors.toList());
     }
-
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException
     {
