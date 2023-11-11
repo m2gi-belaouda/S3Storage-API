@@ -1,6 +1,7 @@
 package com.s3.amazonstorage.Controllers;
 
 import com.s3.amazonstorage.Services.IS3Service;
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -19,8 +21,25 @@ public class S3Controller {
     private IS3Service s3Service;
 
     @PostMapping("upload")
-    public String upload(@RequestParam("file") MultipartFile file){
+    public String upload(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty())
+            return "Please select a file to upload.";
+
+        if (!isImage(file))
+            return "Please upload only images.";
+
         return s3Service.saveFile(file);
+    }
+
+    private boolean isImage(MultipartFile file) {
+        try {
+            return Arrays.asList(
+                    ContentType.IMAGE_JPEG.getMimeType(),
+                    ContentType.IMAGE_PNG.getMimeType(),
+                    ContentType.IMAGE_GIF.getMimeType()).contains(file.getContentType());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @GetMapping("download")
@@ -36,7 +55,6 @@ public class S3Controller {
                               .headers(headers)
                               .body(bytes);
     }
-
 
     @DeleteMapping("delete")
     public  String deleteFile(@RequestParam("filename") String filename){
