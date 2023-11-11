@@ -7,6 +7,7 @@ import com.s3.amazonstorage.Services.IS3Service;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class S3Controller {
     private IS3Service s3Service;
 
     @PostMapping("upload")
+    @ResponseStatus(HttpStatus.CREATED)
     public String upload(@RequestParam("file") MultipartFile file) throws FileNotImageException, FileIsEmptyException {
         new FileValidator(file).isNotEmpty()
                                .isImage();
@@ -46,11 +48,13 @@ public class S3Controller {
     }
 
     @DeleteMapping("delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public  String deleteFile(@RequestParam("filename") String filename){
         return s3Service.deleteFile(filename);
     }
 
     @GetMapping("list")
+    @ResponseStatus(HttpStatus.OK)
     public List<String> getAllFiles(){
         return s3Service.listAllFiles();
     }
