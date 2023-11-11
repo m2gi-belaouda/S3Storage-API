@@ -4,6 +4,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.s3.amazonstorage.Services.IS3Service;
@@ -56,10 +57,12 @@ public class S3Service implements IS3Service {
 
         while(true) {
             try {
-                File file1 = convertMultiPartToFile(file);
-                PutObjectResult putObjectResult = s3.putObject(bucketName, originalFilename, file1);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(file.getSize());
 
-                return putObjectResult.getContentMd5();
+                s3.putObject(new PutObjectRequest(bucketName, originalFilename, file.getInputStream(), metadata));
+
+                return "https://bucket.s3-aws-" + awsRegion + ".amazonaws.com/" + originalFilename;
             } catch (IOException e) {
                 if (++count == maxTries) throw new RuntimeException(e);
             }
@@ -92,17 +95,6 @@ public class S3Service implements IS3Service {
         return  listObjectsV2Result.getObjectSummaries().stream()
                                                         .map(S3ObjectSummary::getKey)
                                                         .collect(Collectors.toList());
-    }
-
-    private File convertMultiPartToFile(MultipartFile file) throws IOException
-    {
-        File convertedFile = new File(file.getOriginalFilename());
-        FileOutputStream fileOutputStream = new FileOutputStream(convertedFile);
-
-        fileOutputStream.write( file.getBytes() );
-        fileOutputStream.close();
-
-        return convertedFile;
     }
 
 }
