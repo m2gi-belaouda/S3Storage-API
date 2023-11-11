@@ -25,8 +25,8 @@ public class S3Controller {
 
     @PostMapping("upload")
     public String upload(@RequestParam("file") MultipartFile file) throws FileNotImageException, FileIsEmptyException {
-        FileValidator.isNotEmpty(file);
-        FileValidator.isImage(file);
+        new FileValidator(file).isNotEmpty()
+                               .isImage();
 
         return s3Service.saveFile(file);
     }
